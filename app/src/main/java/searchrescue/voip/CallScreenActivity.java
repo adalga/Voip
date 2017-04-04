@@ -6,8 +6,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.sinch.android.rtc.PushPair;
 import com.sinch.android.rtc.calling.Call;
+import com.sinch.android.rtc.calling.CallListener;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,9 +33,8 @@ public class CallScreenActivity extends AppCompatActivity {
             });
         }
     }
-    private String callId;
     private long callStart = 0;
-    private Call call = CurrentCall.currentCall;
+    private Call call ;
     private TextView callDuration;
     private TextView callState;
     private TextView callerName;
@@ -40,6 +42,13 @@ public class CallScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_call_screen);
+
+        call = CurrentCall.currentCall;
+        if (call != null) {
+            call.addCallListener(new SinchCallListener());
+        } else {
+            finish();
+        }
 
         callDuration = (TextView) findViewById(R.id.callDuration);
         callerName = (TextView) findViewById(R.id.remoteUser);
@@ -53,7 +62,6 @@ public class CallScreenActivity extends AppCompatActivity {
             }
         });
         callStart = System.currentTimeMillis();
-        callId = getIntent().getStringExtra("CALL_ID");
         callerName.setText(call.getRemoteUserId());
         callState.setText(call.getState().toString());
     }
@@ -81,6 +89,7 @@ public class CallScreenActivity extends AppCompatActivity {
     private void endCall() {
         if (call != null) {
             call.hangup();
+            CurrentCall.currentCall = null ;
         }
         finish();
     }
@@ -95,6 +104,30 @@ public class CallScreenActivity extends AppCompatActivity {
     private void updateCallDuration() {
         if (callStart > 0) {
             callDuration.setText(formatTimespan(System.currentTimeMillis() - callStart));
+        }
+    }
+
+    private class SinchCallListener implements CallListener {
+
+        @Override
+        public void onCallEnded(Call call) {
+            CurrentCall.currentCall = null ;
+            finish();
+        }
+
+        @Override
+        public void onCallEstablished(Call call) {
+            callState.setText("CONNECTION ESTABLISHED");
+        }
+
+        @Override
+        public void onCallProgressing(Call call) {
+
+        }
+
+        @Override
+        public void onShouldSendPushNotification(Call call, List<PushPair> pushPairs) {
+            // Send a push through your push provider here, e.g. GCM
         }
     }
 }

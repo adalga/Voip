@@ -1,6 +1,8 @@
 package searchrescue.voip;
 
 import android.content.Intent;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.IntentCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -43,8 +45,17 @@ public class IncomingCallActivity extends AppCompatActivity {
             call.answer();
             Intent intent = new Intent(this, CallScreenActivity.class);
             intent.putExtra("CALL_ID", callId);
+            intent.addFlags(IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         } else {
+            finish();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(CurrentCall.currentCall  == null) {
             finish();
         }
     }
