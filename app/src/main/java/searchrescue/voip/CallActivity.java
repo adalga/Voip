@@ -52,7 +52,27 @@ public class CallActivity extends AppCompatActivity {
                 CurrentCall.currentCall = call;
                 Intent intent = new Intent(getApplicationContext(), CallScreenActivity.class);
                 intent.putExtra("CALL_ID", call.getCallId());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sinchClient.getCallClient().addCallClientListener(new SinchCallClientListener());
+
+        button = (Button) findViewById(R.id.button);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                call = sinchClient.getCallClient().callUser(recipientId);
+                CurrentCall.currentCall = call;
+                Intent intent = new Intent(getApplicationContext(), CallScreenActivity.class);
+                intent.putExtra("CALL_ID", call.getCallId());
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
         });
@@ -65,7 +85,7 @@ public class CallActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), IncomingCallActivity.class);
             intent.putExtra("CALL_ID", call.getCallId());
             CurrentCall.currentCall = call ;
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
     }
