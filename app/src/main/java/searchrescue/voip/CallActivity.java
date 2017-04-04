@@ -1,27 +1,20 @@
 package searchrescue.voip;
 
 import android.content.Intent;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-import com.sinch.android.rtc.PushPair;
 import com.sinch.android.rtc.Sinch;
 import com.sinch.android.rtc.SinchClient;
 import com.sinch.android.rtc.calling.Call;
 import com.sinch.android.rtc.calling.CallClient;
 import com.sinch.android.rtc.calling.CallClientListener;
-import com.sinch.android.rtc.calling.CallListener;
 
-import java.util.List;
 
 public class CallActivity extends AppCompatActivity {
 
     private Call call;
-    private TextView callState;
     private SinchClient sinchClient;
     private Button button;
     private String callerId;
@@ -39,8 +32,8 @@ public class CallActivity extends AppCompatActivity {
         sinchClient = Sinch.getSinchClientBuilder()
                 .context(this)
                 .userId(callerId)
-                .applicationKey("11b3140c-a524-45ca-92f3-908c36cb519f")
-                .applicationSecret("hLiswJMouUuTNP/z8RTLNw==")
+                .applicationKey("a50acbf1-2d7e-455c-94e1-0446bd5f0938")
+                .applicationSecret("vKf/OU5f806vWT5vvFQxmw==")
                 .environmentHost("sandbox.sinch.com")
                 .build();
 
@@ -51,58 +44,28 @@ public class CallActivity extends AppCompatActivity {
         sinchClient.getCallClient().addCallClientListener(new SinchCallClientListener());
 
         button = (Button) findViewById(R.id.button);
-        callState = (TextView) findViewById(R.id.callState);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (call == null) {
-                    call = sinchClient.getCallClient().callUser(recipientId);
-                    call.addCallListener(new SinchCallListener());
-                    button.setText("Hang Up");
-                } else {
-                    call.hangup();
-                }
+                call = sinchClient.getCallClient().callUser(recipientId);
+                CurrentCall.currentCall = call;
+                Intent intent = new Intent(getApplicationContext(), CallScreenActivity.class);
+                intent.putExtra("CALL_ID", call.getCallId());
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
             }
         });
-    }
-
-    private class SinchCallListener implements CallListener {
-        @Override
-        public void onCallEnded(Call endedCall) {
-            call = null;
-            button.setText("Call");
-            callState.setText("");
-            setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
-        }
-
-        @Override
-        public void onCallEstablished(Call establishedCall) {
-            callState.setText("connected");
-            setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-        }
-
-        @Override
-        public void onCallProgressing(Call progressingCall) {
-            callState.setText("ringing");
-        }
-
-        @Override
-        public void onShouldSendPushNotification(Call call, List<PushPair> pushPairs) {}
     }
 
     private class SinchCallClientListener implements CallClientListener {
         @Override
         public void onIncomingCall(CallClient callClient, Call incomingCall) {
-            /*call = incomingCall;
-            call.answer();
-            call.addCallListener(new SinchCallListener());
-            button.setText("Hang Up");*/
             call = incomingCall;
             Intent intent = new Intent(getApplicationContext(), IncomingCallActivity.class);
             intent.putExtra("CALL_ID", call.getCallId());
             CurrentCall.currentCall = call ;
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }
     }
