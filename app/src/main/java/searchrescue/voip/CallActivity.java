@@ -85,7 +85,6 @@ public class CallActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), IncomingCallActivity.class);
             intent.putExtra("CALL_ID", call.getCallId());
             CurrentCall.currentCall = call ;
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
     }

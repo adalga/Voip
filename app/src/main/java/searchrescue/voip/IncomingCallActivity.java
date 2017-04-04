@@ -18,6 +18,8 @@ import java.util.List;
 public class IncomingCallActivity extends AppCompatActivity {
     private String callId;
     private Call call ;
+    private AudioPlayer audioPlayer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,6 +27,8 @@ public class IncomingCallActivity extends AppCompatActivity {
 
         call = CurrentCall.currentCall;
         if (call != null) {
+            audioPlayer = new AudioPlayer(this);
+            audioPlayer.playRingtone();
             call.addCallListener(new SinchCallListener());
             TextView remoteUser = (TextView) findViewById(R.id.remoteUser);
             remoteUser.setText(call.getRemoteUserId());
@@ -40,7 +44,7 @@ public class IncomingCallActivity extends AppCompatActivity {
     }
 
     private void answerClicked() {
-
+        audioPlayer.stopRingtone();
         if (call != null) {
             call.answer();
             Intent intent = new Intent(this, CallScreenActivity.class);
@@ -61,10 +65,11 @@ public class IncomingCallActivity extends AppCompatActivity {
     }
 
     private void declineClicked() {
-
+        audioPlayer.stopRingtone();
         if (call != null) {
             call.hangup();
         }
+        CurrentCall.currentCall = null;
         finish();
     }
 
@@ -72,6 +77,9 @@ public class IncomingCallActivity extends AppCompatActivity {
 
         @Override
         public void onCallEnded(Call call) {
+
+            audioPlayer.stopRingtone();
+            CurrentCall.currentCall = null;
             finish();
         }
 
